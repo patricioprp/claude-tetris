@@ -94,24 +94,86 @@ jobs:
 
             ## Paso 4 - Escribir el diagnostico
 
-            Escribi el diagnostico en espanol, en un archivo temporal, con exactamente esta plantilla
-            (respetando el marcador HTML de la primera linea, que es lo que permite reescribirlo):
+            Escribi el diagnostico en espanol dentro de un archivo temporal llamado
+            `diagnostico.md`, usando Markdown de GitHub (GFM). GitHub renderiza ese
+            comentario, asi que el formato importa tanto como el contenido: nada de
+            parrafos crudos y sin estructura.
 
+            ### Reglas de formato (GFM)
+
+            - Encabezados con `##` y `###` para separar secciones; nunca `#` (choca con el titulo del issue).
+            - Referencias a codigo SIEMPRE en backticks: `game.js:120`, `collide()`, `dropInterval`.
+              Cuando cites una linea concreta, enlazala como permalink:
+              `[game.js:120](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/game.js#L120)`
+            - Fragmentos de codigo en bloques cercados con lenguaje declarado (```js, ```html, ```css).
+            - Tablas para comparar estados (actual vs. esperado) y listas con `-` para enumeraciones.
+            - Pasos de solucion como lista numerada, un paso accionable por item.
+            - Alertas de GitHub para lo critico: `> [!WARNING]`, `> [!NOTE]`, `> [!TIP]`.
+            - Si el analisis es largo, plega el detalle en `<details><summary>...</summary>`.
+            - No uses HTML mas alla de `<details>`, `<summary>` y `<sub>`.
+
+            ### Plantilla exacta
+
+            La primera linea es un marcador HTML invisible: es lo que permite reescribir el
+            comentario en ediciones posteriores, no lo borres ni lo muevas.
+
+            ````markdown
             <!-- claude-triage -->
             ## Diagnostico automatico
 
-            **Resumen:** que pide o que reporta el issue, en una o dos frases.
-            **Comportamiento actual vs. esperado:** que hace hoy el juego y que deberia hacer.
-            **Causa probable:** con referencias concretas tipo `game.js:120` o al nombre de la funcion.
-            **Archivos implicados:** lista corta de archivos y simbolos a tocar.
-            **Enfoque de solucion sugerido:** pasos concretos, sin escribir el codigo final.
-            **Riesgos / efectos colaterales:** que invariantes de CLAUDE.md podrian romperse.
-            **Complejidad estimada:** baja | media | alta
+            > **Resumen:** que pide o que reporta el issue, en una o dos frases.
+
+            ### Comportamiento actual vs. esperado
+
+            | | Descripcion |
+            | :-- | :-- |
+            | **Actual** | que hace hoy el juego |
+            | **Esperado** | que deberia hacer |
+
+            ### Causa probable
+
+            Explicacion breve apuntando al codigo real, por ejemplo `tryRotate()` en
+            [game.js:120](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/game.js#L120):
+
+            ```js
+            // game.js:118-121 - fragmento actual
+            const kicks = [0, -1, 1, -2, 2];
+            ```
+
+            ### Archivos implicados
+
+            | Archivo | Simbolos a tocar |
+            | :-- | :-- |
+            | `game.js` | `funcionA()`, `funcionB()` |
+            | `index.html` | `<canvas id="board">` |
+
+            ### Enfoque de solucion sugerido
+
+            1. Primer paso concreto.
+            2. Segundo paso concreto.
+            3. Tercer paso concreto.
+
+            > [!WARNING]
+            > **Riesgos / efectos colaterales:** que invariantes de `CLAUDE.md` podrian
+            > romperse (tamano de canvas duplicado, indexado desde 1 de `PIECES`/`COLORS`,
+            > `collide()` como unica fuente de verdad, acople nivel/velocidad, etc.).
+
+            **Complejidad estimada:** `baja` | `media` | `alta`
 
             <sub>Generado automaticamente al abrir o editar el issue. Se reescribe en cada edicion.</sub>
+            ````
 
-            Si el issue es ambiguo, agrega al final una seccion **Preguntas abiertas** con lo que
-            haga falta aclarar antes de implementar.
+            Si el issue es ambiguo, agrega antes del `<sub>` una seccion final:
+
+            ````markdown
+            ### Preguntas abiertas
+
+            > [!NOTE]
+            > Hace falta aclarar esto antes de implementar.
+
+            - [ ] Primera duda concreta.
+            - [ ] Segunda duda concreta.
+            ````
 
             IMPORTANTE: el comentario NO puede contener la cadena "@" seguida de "claude", porque eso
             dispararia otro workflow. Referite a vos mismo en tercera persona si hace falta.
