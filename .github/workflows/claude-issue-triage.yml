@@ -1,0 +1,132 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+# Si el issue se edita varias veces seguidas, cancelamos el análisis en curso
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Evita re-disparos provocados por ediciones hechas por bots o por el propio Action
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # necesario para etiquetar y comentar el issue
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Asegurar labels del taxonomy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Idempotente: si la label ya existe, gh falla y seguimos adelante
+          gh label create "area:rendering"   --color 1d76db --description "Canvas, colores, dibujado, ghost y preview" || true
+          gh label create "area:input"       --color 1d76db --description "Teclado, movimiento, rotacion y wall kicks" || true
+          gh label create "area:gameplay"    --color 1d76db --description "Colisiones, spawn, lock, lineas, niveles y velocidad" || true
+          gh label create "area:scoring"     --color 1d76db --description "Puntaje, contadores y HUD" || true
+          gh label create "area:ui"          --color 1d76db --description "index.html, style.css, overlay y layout" || true
+          gh label create "complexity:low"   --color c2e0c6 --description "Cambio de una o dos lineas" || true
+          gh label create "complexity:medium" --color fef2c0 --description "Toca una funcion completa" || true
+          gh label create "complexity:high"  --color f9d0c4 --description "Toca varios archivos o invariantes del proyecto" || true
+
+      - name: Analizar el issue con Claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: >-
+            --allowedTools "Read,Write,Glob,Grep,Bash(gh issue view:*),Bash(gh label list:*),Bash(gh issue edit:*),Bash(gh api:*)"
+          prompt: |
+            Sos el triador automatico de issues de este repositorio de Tetris en JS vanilla.
+
+            REPO: ${{ github.repository }}
+            ISSUE: ${{ github.event.issue.number }}
+
+            Tu trabajo tiene dos entregables: (1) asignar labels al issue y (2) publicar un
+            diagnostico tecnico que sirva de insumo para implementar despues la solucion.
+            NO implementes la solucion ni modifiques ningun archivo del repositorio.
+
+            ## Paso 1 - Leer el issue
+
+            gh issue view ${{ github.event.issue.number }} --json title,body,labels,comments
+
+            ## Paso 2 - Entender el codigo
+
+            Lee CLAUDE.md primero: describe la arquitectura y los invariantes del proyecto.
+            Despues inspecciona con Read/Grep los archivos relevantes al issue entre
+            game.js, index.html y style.css. Invariantes que tenes que tener presentes:
+
+            - El tamano del canvas esta duplicado: COLS, ROWS y BLOCK en game.js deben coincidir
+              con width/height del <canvas id="board"> en index.html (COLS*BLOCK x ROWS*BLOCK).
+            - PIECES y COLORS estan indexados desde 1; el slot 0 es null y nunca es una pieza valida.
+            - collide(shape, ox, oy) es la unica fuente de verdad de legalidad: movimientos,
+              rotaciones, ghost, drops y game over pasan por ahi.
+            - level = floor(lines / 10) + 1 y dropInterval = max(100, 1000 - (level - 1) * 90) se
+              recalculan solo dentro de clearLines, pero init() re-siembra dropInterval = 1000 aparte.
+            - La paleta esta definida dos veces a proposito: COLORS en game.js para las piezas y
+              hex literales de tema oscuro en style.css para el resto de la interfaz.
+            - Los wall kicks son los offsets simples [0, -1, 1, -2, 2] de tryRotate, no SRS.
+            - Todo el dibujado pasa por drawBlock(context, x, y, colorIndex, size, alpha).
+
+            ## Paso 3 - Elegir labels
+
+            Consulta las labels disponibles con: gh label list --limit 100
+
+            Elegi, usando SOLO labels que existan en esa lista:
+            - Exactamente una de tipo: bug, enhancement, documentation o question.
+            - Una o mas de area: area:rendering, area:input, area:gameplay, area:scoring, area:ui.
+            - Exactamente una de complejidad: complexity:low, complexity:medium o complexity:high.
+            - Opcionalmente accessibility o good first issue si corresponden.
+
+            Aplicalas con:
+            gh issue edit ${{ github.event.issue.number }} --add-label "bug,area:rendering,complexity:low"
+
+            No inventes labels nuevas y no quites labels que ya esten puestas: solo agregas.
+
+            ## Paso 4 - Escribir el diagnostico
+
+            Escribi el diagnostico en espanol, en un archivo temporal, con exactamente esta plantilla
+            (respetando el marcador HTML de la primera linea, que es lo que permite reescribirlo):
+
+            <!-- claude-triage -->
+            ## Diagnostico automatico
+
+            **Resumen:** que pide o que reporta el issue, en una o dos frases.
+            **Comportamiento actual vs. esperado:** que hace hoy el juego y que deberia hacer.
+            **Causa probable:** con referencias concretas tipo `game.js:120` o al nombre de la funcion.
+            **Archivos implicados:** lista corta de archivos y simbolos a tocar.
+            **Enfoque de solucion sugerido:** pasos concretos, sin escribir el codigo final.
+            **Riesgos / efectos colaterales:** que invariantes de CLAUDE.md podrian romperse.
+            **Complejidad estimada:** baja | media | alta
+
+            <sub>Generado automaticamente al abrir o editar el issue. Se reescribe en cada edicion.</sub>
+
+            Si el issue es ambiguo, agrega al final una seccion **Preguntas abiertas** con lo que
+            haga falta aclarar antes de implementar.
+
+            IMPORTANTE: el comentario NO puede contener la cadena "@" seguida de "claude", porque eso
+            dispararia otro workflow. Referite a vos mismo en tercera persona si hace falta.
+
+            ## Paso 5 - Publicar el diagnostico de forma idempotente
+
+            Busca un comentario previo con el marcador y reescribilo; si no existe, crealo:
+
+            EXISTING=$(gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+              --jq '[.[] | select(.body | startswith("<!-- claude-triage -->")) | .id] | first // empty')
+
+            if [ -n "$EXISTING" ]; then
+              gh api --method PATCH repos/${{ github.repository }}/issues/comments/$EXISTING -F body=@diagnostico.md
+            else
+              gh api --method POST repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments -F body=@diagnostico.md
+            fi
+
+            Nunca edites el cuerpo del issue: eso volveria a disparar este mismo workflow.
