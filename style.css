@@ -125,11 +125,22 @@ body {
   letter-spacing: 1px;
 }
 
-#next-canvas {
+#next-canvas,
+#hold-canvas {
   display: block;
   border: 1px solid #2a2a3a;
   background: #1a1a25;
   border-radius: 4px;
+}
+
+/* ---- Reserva bloqueada ---- */
+.hold-section {
+  transition: opacity 0.15s, filter 0.15s;
+}
+
+.hold-section.locked {
+  opacity: 0.35;
+  filter: grayscale(0.8);
 }
 
 /* ---- Controles ---- */
@@ -238,7 +249,8 @@ body.light .value {
   color: #3d5afe;
 }
 
-body.light #next-canvas {
+body.light #next-canvas,
+body.light #hold-canvas {
   border: 1px solid #d0d0da;
   background: #ffffff;
 }
