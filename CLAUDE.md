@@ -21,7 +21,7 @@ There is no build, lint, or test command. Verification is manual: open the page 
 
 Key structures:
 
-- **`board`** — `ROWS × COLS` array of ints. `0` = empty; `1–7` = color index, which doubles as the piece type. `PIECES[type]` and `COLORS[type]` are 1-indexed arrays whose slot `0` is `null`, so index 0 is never a valid piece.
+- **`board`** — `ROWS × COLS` array of ints. `0` = empty; `1–8` = color index, which doubles as the piece type. `PIECES[type]` and `COLORS[type]` are 1-indexed arrays whose slot `0` is `null`, so index 0 is never a valid piece. Type `8` is the *tuerca* (nut), a 3×3 ring with an interior `0` — the only piece whose shape matrix has a hole. The hole is enclosed by the ring on all four sides, so it never slides over a stack; instead every lock buries a sealed, unreachable gap at row `y+1`, and that row can only clear once everything above it is gone. It spawns via a weighted roll in `randomPiece` (`NUT_CHANCE`, currently 10%) rather than the uniform 1-in-7 used for the classic tetrominoes.
 - **`current` / `next`** — `{ type, shape, x, y }`. `shape` is a mutable square matrix filled with the piece's own type number; rotation replaces it via `rotateCW` (transpose + reverse). Pieces are deep-copied out of `PIECES` in `randomPiece()` — never mutate `PIECES` itself.
 - **`collide(shape, ox, oy)`** — the single source of truth for legality. Every move, rotation, ghost projection, drop, and the game-over check goes through it. Rows above the board (`ny < 0`) are allowed, so spawning partially off-screen is legal.
 
