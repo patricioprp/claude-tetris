@@ -41,6 +41,9 @@ const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
 const nextCtx = nextCanvas.getContext('2d');
+const holdCanvas = document.getElementById('hold-canvas');
+const holdCtx = holdCanvas.getContext('2d');
+const holdSection = document.getElementById('hold-section');
 const scoreEl = document.getElementById('score');
 const linesEl = document.getElementById('lines');
 const levelEl = document.getElementById('level');
@@ -50,17 +53,21 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let board, current, next, hold, canHold, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let theme = 'dark';
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 }
 
-function randomPiece() {
-  const type = Math.random() < NUT_CHANCE ? NUT_TYPE : Math.floor(Math.random() * 7) + 1;
+// Construye una pieza a partir de un tipo dado; copia profunda para no mutar PIECES.
+function makePiece(type) {
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
+}
+
+function randomPiece() {
+  return makePiece(Math.random() < NUT_CHANCE ? NUT_TYPE : Math.floor(Math.random() * 7) + 1);
 }
 
 function collide(shape, ox, oy) {
@@ -146,6 +153,21 @@ function softDrop() {
   }
 }
 
+// Reserva: guarda la pieza activa o la intercambia con la ya reservada. Solo 1 uso por turno.
+function holdPiece() {
+  if (!canHold) return;
+  const stashed = hold;
+  hold = current.type;
+  if (stashed === null) {
+    spawn();                      // bucket vacio: la activa se guarda y entra la del Next
+  } else {
+    current = makePiece(stashed); // intercambio: vuelve sin rotacion y centrada
+    if (collide(current.shape, current.x, current.y)) endGame();
+  }
+  canHold = false;                // spawn() lo pone en true, por eso se bloquea DESPUES
+  drawHold();
+}
+
 function lockPiece() {
   merge();
   clearLines();
@@ -155,10 +177,12 @@ function lockPiece() {
 function spawn() {
   current = next;
   next = randomPiece();
+  canHold = true;   // cada pieza nueva rehabilita la reserva
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
   drawNext();
+  drawHold();       // refresca el atenuado del panel
 }
 
 function updateHUD() {
@@ -218,15 +242,26 @@ function draw() {
       drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
 }
 
-function drawNext() {
-  const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  const shape = next.shape;
+// Rejilla de vista previa 4x4 compartida por NEXT y HOLD; shape null = lienzo limpio.
+function drawPreview(context, canvasEl, shape) {
+  const PB = 30;
+  context.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  if (!shape) return;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+      drawBlock(context, offX + c, offY + r, shape[r][c], PB);
+}
+
+function drawNext() {
+  drawPreview(nextCtx, nextCanvas, next.shape);
+}
+
+function drawHold() {
+  // drawPreview solo lee la matriz, por eso es seguro pasar PIECES[hold] sin copiar.
+  drawPreview(holdCtx, holdCanvas, hold ? PIECES[hold] : null);
+  holdSection.classList.toggle('locked', !canHold);   // atenua el panel si esta bloqueado
 }
 
 function endGame() {
@@ -277,6 +312,8 @@ function init() {
   dropInterval = 1000;
   dropAccum = 0;
   lastTime = performance.now();
+  hold = null;      // reiniciar descarta la pieza reservada
+  canHold = true;
   next = randomPiece();
   spawn();
   updateHUD();
@@ -306,6 +343,11 @@ document.addEventListener('keydown', e => {
       e.preventDefault();
       hardDrop();
       break;
+    case 'KeyC':
+    case 'ShiftLeft':
+    case 'ShiftRight':
+      holdPiece();
+      break;
   }
   updateHUD();
 });
@@ -316,7 +358,11 @@ function applyTheme(t) {
   theme = t;
   document.body.classList.toggle('light', theme === 'light');
   themeToggle.checked = theme === 'light';
-  if (board) draw();
+  if (board) {
+    draw();
+    drawNext();
+    drawHold();
+  }
 }
 
 themeToggle.addEventListener('change', () => {
