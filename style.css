@@ -285,3 +285,160 @@ body.light #restart-btn {
 body.light #restart-btn:hover {
   background: #5c74ff;
 }
+
+/* ---- Menú de pausa ---- */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.pause-overlay.hidden {
+  display: none;
+}
+
+.pause-box {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 20px;
+  background: #16161f;
+  border: 1px solid #2a2a3a;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+}
+
+.pause-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #7aa2f7;
+}
+
+.pause-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pause-btn {
+  width: 100%;
+  background: #22223a;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pause-btn:hover {
+  background: #7aa2f7;
+  color: #0f0f17;
+}
+
+.pause-controls {
+  width: 100%;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #1a1a25;
+  border: 1px solid #2a2a3a;
+  border-radius: 6px;
+}
+
+.pause-controls.hidden {
+  display: none;
+}
+
+.pause-controls li {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pause-level {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#start-level {
+  background: #22223a;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pause-hint {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #555570;
+}
+
+/* Menú de pausa en modo claro */
+body.light .pause-overlay {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+body.light .pause-box {
+  background: #ffffff;
+  border-color: #d0d0da;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+body.light .pause-title {
+  color: #3d5afe;
+}
+
+body.light .pause-btn {
+  background: #e8e8f0;
+  border-color: #cfcfe0;
+  color: #2a2a35;
+}
+
+body.light .pause-btn:hover {
+  background: #3d5afe;
+  color: #ffffff;
+}
+
+body.light .pause-controls {
+  background: #f7f7fb;
+  border-color: #d0d0da;
+}
+
+body.light .pause-controls li {
+  color: #666;
+}
+
+body.light #start-level {
+  background: #ffffff;
+  border-color: #cfcfe0;
+  color: #2a2a35;
+}
+
+body.light .pause-hint {
+  color: #8888a0;
+}
