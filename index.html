@@ -65,6 +65,50 @@
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
+
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-box">
+        <p class="pause-title">PAUSA</p>
+
+        <div class="pause-actions">
+          <button id="resume-btn" class="pause-btn">Reanudar</button>
+          <button id="menu-restart-btn" class="pause-btn">Reiniciar</button>
+          <button id="toggle-controls-btn" class="pause-btn">Ver controles</button>
+        </div>
+
+        <ul id="pause-controls" class="pause-controls hidden">
+          <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+          <li><kbd>↑</kbd> rotar</li>
+          <li><kbd>↓</kbd> bajar</li>
+          <li><kbd>Space</kbd> caída</li>
+          <li><kbd>C</kbd><kbd>Shift</kbd> reserva</li>
+          <li><kbd>P</kbd> pausa</li>
+          <li><kbd>Esc</kbd> menú</li>
+        </ul>
+
+        <div class="pause-level">
+          <label class="label" for="start-level">NIVEL INICIAL</label>
+          <select id="start-level">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+          </select>
+          <span class="pause-hint">Se aplica al empezar una partida nueva</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="game.js"></script>

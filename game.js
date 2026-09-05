@@ -54,6 +54,7 @@ const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 
 let board, current, next, hold, canHold, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let startLevel, baseLevel, menuOpen;   // preferencia de nivel, nivel base de la partida en curso y estado del menu
 let theme = 'dark';
 
 function createBoard() {
@@ -124,7 +125,7 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
+    level = baseLevel + Math.floor(lines / 10);   // parte del nivel inicial elegido en el menu
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
@@ -272,17 +273,45 @@ function endGame() {
   overlay.classList.remove('hidden');
 }
 
+// ---- Menu de pausa ----
+const START_LEVEL_STORAGE_KEY = 'tetris-start-level';
+const pauseOverlay = document.getElementById('pause-overlay');
+const resumeBtn = document.getElementById('resume-btn');
+const menuRestartBtn = document.getElementById('menu-restart-btn');
+const toggleControlsBtn = document.getElementById('toggle-controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const startLevelSelect = document.getElementById('start-level');
+const MAX_START_LEVEL = startLevelSelect.options.length;   // el rango lo define el <select> de index.html
+
+// Nivel inicial guardado; cualquier valor ausente o fuera de rango cae a 1.
+function loadStartLevel() {
+  const stored = parseInt(localStorage.getItem(START_LEVEL_STORAGE_KEY), 10);
+  return stored >= 1 && stored <= MAX_START_LEVEL ? stored : 1;
+}
+
+function openMenu() {
+  menuOpen = true;
+  startLevelSelect.value = String(startLevel);
+  pauseControls.classList.add('hidden');              // el menu siempre abre con los controles plegados
+  toggleControlsBtn.textContent = 'Ver controles';
+  pauseOverlay.classList.remove('hidden');
+}
+
+function closeMenu() {
+  menuOpen = false;
+  pauseOverlay.classList.add('hidden');
+}
+
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
-    lastTime = performance.now();
+    closeMenu();
+    lastTime = performance.now();   // sin esto el primer dt tras reanudar seria enorme
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    openMenu();
   }
 }
 
@@ -306,10 +335,11 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  baseLevel = startLevel;   // congelado al empezar: cambiar la preferencia no altera la partida en curso
+  level = baseLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = Math.max(100, 1000 - (baseLevel - 1) * 90);   // misma formula que clearLines
   dropAccum = 0;
   lastTime = performance.now();
   hold = null;      // reiniciar descarta la pieza reservada
@@ -317,14 +347,15 @@ function init() {
   next = randomPiece();
   spawn();
   updateHUD();
+  closeMenu();
   overlay.classList.add('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
+  if (paused || menuOpen || gameOver) return;   // con el menu abierto ninguna tecla mueve la pieza
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -354,6 +385,21 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+resumeBtn.addEventListener('click', () => togglePause());
+menuRestartBtn.addEventListener('click', () => init());   // init() cierra el menu y reengancha el bucle
+
+toggleControlsBtn.addEventListener('click', () => {
+  const hidden = pauseControls.classList.toggle('hidden');
+  toggleControlsBtn.textContent = hidden ? 'Ver controles' : 'Ocultar controles';
+});
+
+startLevelSelect.addEventListener('change', () => {
+  const value = Math.min(MAX_START_LEVEL, Math.max(1, parseInt(startLevelSelect.value, 10) || 1));
+  startLevel = value;
+  startLevelSelect.value = String(value);
+  localStorage.setItem(START_LEVEL_STORAGE_KEY, String(value));   // se aplica en la proxima partida
+});
+
 function applyTheme(t) {
   theme = t;
   document.body.classList.toggle('light', theme === 'light');
@@ -372,5 +418,7 @@ themeToggle.addEventListener('change', () => {
 });
 
 applyTheme(localStorage.getItem(THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark');
+
+startLevel = loadStartLevel();   // se lee una sola vez; despues manda el valor en memoria
 
 init();
