@@ -275,13 +275,13 @@ function endGame() {
 
 // ---- Menu de pausa ----
 const START_LEVEL_STORAGE_KEY = 'tetris-start-level';
-const MAX_START_LEVEL = 15;
 const pauseOverlay = document.getElementById('pause-overlay');
 const resumeBtn = document.getElementById('resume-btn');
 const menuRestartBtn = document.getElementById('menu-restart-btn');
 const toggleControlsBtn = document.getElementById('toggle-controls-btn');
 const pauseControls = document.getElementById('pause-controls');
 const startLevelSelect = document.getElementById('start-level');
+const MAX_START_LEVEL = startLevelSelect.options.length;   // el rango lo define el <select> de index.html
 
 // Nivel inicial guardado; cualquier valor ausente o fuera de rango cae a 1.
 function loadStartLevel() {
@@ -335,7 +335,6 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  startLevel = loadStartLevel();
   baseLevel = startLevel;   // congelado al empezar: cambiar la preferencia no altera la partida en curso
   level = baseLevel;
   paused = false;
@@ -419,5 +418,7 @@ themeToggle.addEventListener('change', () => {
 });
 
 applyTheme(localStorage.getItem(THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark');
+
+startLevel = loadStartLevel();   // se lee una sola vez; despues manda el valor en memoria
 
 init();
