@@ -285,3 +285,252 @@ body.light #restart-btn {
 body.light #restart-btn:hover {
   background: #5c74ff;
 }
+
+/* ---- Records ---- */
+.records {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 250px;
+}
+
+.records.hidden {
+  display: none;
+}
+
+.records-title,
+.records-subtitle {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #8888a8;
+  font-weight: 600;
+  text-align: center;
+}
+
+.records-list {
+  list-style: none;
+  counter-reset: rank;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+}
+
+.records-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d0d0e0;
+}
+
+.records-list li:not(.records-empty)::before {
+  counter-increment: rank;
+  content: counter(rank) '.';
+  color: #555570;
+  width: 16px;
+  flex-shrink: 0;
+}
+
+.record-name {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-score {
+  color: #7aa2f7;
+  white-space: nowrap;
+}
+
+.records-list li.current {
+  background: rgba(122, 162, 247, 0.25);
+  outline: 1px solid #7aa2f7;
+  color: #ffffff;
+}
+
+.records-empty {
+  justify-content: center;
+  color: #666680;
+  font-style: italic;
+}
+
+.records-stats {
+  font-size: 11px;
+  color: #8888a8;
+  text-align: center;
+}
+
+.records-stats span {
+  color: #7aa2f7;
+  font-weight: 700;
+}
+
+/* ---- Entrada del nombre ---- */
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.name-entry.hidden {
+  display: none;
+}
+
+.name-entry-row {
+  display: flex;
+  gap: 6px;
+}
+
+#player-name {
+  flex: 1;
+  min-width: 0;
+  background: #1a1a25;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  letter-spacing: 2px;
+  padding: 6px 8px;
+  text-transform: uppercase;
+  user-select: text;
+}
+
+#player-name:focus {
+  outline: none;
+  border-color: #7aa2f7;
+}
+
+.records-btn {
+  background: transparent;
+  border: 1px solid #7aa2f7;
+  border-radius: 6px;
+  color: #7aa2f7;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.records-btn:hover {
+  background: #7aa2f7;
+  color: #0f0f17;
+}
+
+.records-btn.secondary {
+  border-color: #555570;
+  color: #8888a8;
+}
+
+.records-btn.secondary:hover {
+  background: #555570;
+  color: #e0e0e0;
+}
+
+/* ---- Pantalla de inicio ---- */
+#start-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #7aa2f7;
+}
+
+#play-btn {
+  background: #7aa2f7;
+  color: #0f0f17;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 34px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#play-btn:hover {
+  background: #9bbdff;
+}
+
+/* ---- Records en modo claro ---- */
+body.light .records-title,
+body.light .records-subtitle,
+body.light .records-stats {
+  color: #6a6a85;
+}
+
+body.light .records-list li {
+  background: rgba(0, 0, 0, 0.05);
+  color: #2a2a35;
+}
+
+body.light .records-list li:not(.records-empty)::before {
+  color: #9a9ab0;
+}
+
+body.light .record-score,
+body.light .records-stats span {
+  color: #3d5afe;
+}
+
+body.light .records-list li.current {
+  background: rgba(61, 90, 254, 0.18);
+  outline-color: #3d5afe;
+  color: #10102a;
+}
+
+body.light .records-empty {
+  color: #8a8aa0;
+}
+
+body.light #player-name {
+  background: #ffffff;
+  border-color: #cfcfe0;
+  color: #2a2a35;
+}
+
+body.light #player-name:focus {
+  border-color: #3d5afe;
+}
+
+body.light .records-btn {
+  border-color: #3d5afe;
+  color: #3d5afe;
+}
+
+body.light .records-btn:hover {
+  background: #3d5afe;
+  color: #ffffff;
+}
+
+body.light .records-btn.secondary {
+  border-color: #b0b0c5;
+  color: #6a6a85;
+}
+
+body.light .records-btn.secondary:hover {
+  background: #b0b0c5;
+  color: #ffffff;
+}
+
+body.light #start-title {
+  color: #3d5afe;
+}
+
+body.light #play-btn {
+  background: #3d5afe;
+  color: #ffffff;
+}
+
+body.light #play-btn:hover {
+  background: #5c74ff;
+}
