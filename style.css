@@ -285,3 +285,142 @@ body.light #restart-btn {
 body.light #restart-btn:hover {
   background: #5c74ff;
 }
+
+/* ---- Skins ---- */
+/* Eje independiente del modo claro/oscuro: las dos preferencias se combinan. */
+.skin-section select {
+  background: #1a1a25;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.skin-section select:focus {
+  outline: 1px solid #7aa2f7;
+}
+
+body.light .skin-section select {
+  background: #ffffff;
+  color: #2a2a35;
+  border: 1px solid #cfcfe0;
+}
+
+/* Neon: fondo casi negro en ambos temas para que el resplandor destaque. */
+body.skin-neon {
+  background: #05050c;
+  color: #d8f6ff;
+}
+
+body.skin-neon #board,
+body.skin-neon #next-canvas,
+body.skin-neon #hold-canvas {
+  background: #08080f;
+  border: 1px solid #10405a;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.18);
+}
+
+body.skin-neon .game-title {
+  color: #00e5ff;
+  text-shadow: 0 0 22px rgba(0, 229, 255, 0.7);
+}
+
+body.skin-neon .value {
+  color: #00e5ff;
+}
+
+body.light.skin-neon {
+  background: #12121e;
+  color: #d8f6ff;
+}
+
+body.light.skin-neon #board,
+body.light.skin-neon #next-canvas,
+body.light.skin-neon #hold-canvas {
+  background: #16162a;
+  border: 1px solid #2c5f7a;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
+}
+
+body.light.skin-neon .game-title,
+body.light.skin-neon .value {
+  color: #4df3ff;
+}
+
+/* El fondo de neon es oscuro tambien en modo claro: hay que recuperar el contraste. */
+body.light.skin-neon .label {
+  color: #7fa8bb;
+}
+
+body.light.skin-neon .controls li {
+  color: #a9c6d2;
+}
+
+body.light.skin-neon kbd {
+  background: #1b2b3a;
+  border: 1px solid #2c5f7a;
+  color: #cfeaf5;
+}
+
+body.light.skin-neon .skin-section select {
+  background: #16162a;
+  color: #d8f6ff;
+  border: 1px solid #2c5f7a;
+}
+
+body.light.skin-neon .theme-slider {
+  background: #1b2b3a;
+  border-color: #2c5f7a;
+}
+
+body.light.skin-neon .overlay {
+  background: rgba(5, 5, 12, 0.75);
+}
+
+/* Pastel: fondos suaves y bordes redondeados. */
+body.skin-pastel #board,
+body.skin-pastel #next-canvas,
+body.skin-pastel #hold-canvas {
+  background: #22222e;
+  border: 1px solid #35354a;
+  border-radius: 10px;
+}
+
+body.light.skin-pastel {
+  background: #fbf7fd;
+}
+
+body.light.skin-pastel #board,
+body.light.skin-pastel #next-canvas,
+body.light.skin-pastel #hold-canvas {
+  background: #fffdff;
+  border: 1px solid #e2d8ea;
+  border-radius: 10px;
+}
+
+/* Pixel art: bordes duros, sin sombras difusas y tipografia monoespaciada. */
+body.skin-pixel #board,
+body.skin-pixel #next-canvas,
+body.skin-pixel #hold-canvas {
+  background: #14141c;
+  border: 2px solid #4a4a60;
+  border-radius: 0;
+  box-shadow: none;
+  image-rendering: pixelated;
+}
+
+body.skin-pixel .game-title {
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 6px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+body.light.skin-pixel #board,
+body.light.skin-pixel #next-canvas,
+body.light.skin-pixel #hold-canvas {
+  background: #f6f6ec;
+  border: 2px solid #a8a894;
+}
